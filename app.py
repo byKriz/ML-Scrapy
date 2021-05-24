@@ -4,9 +4,7 @@ import requests
 import time
 import random
 
-# driver = webdriver.Chrome('./chromedriver.exe')
 url = 'https://listado.mercadolibre.com.ve/repuestos#D[A:repuestos]'
-# page_url = driver.get(url)
 r = requests.get(url)
 soup = BeautifulSoup(r.text, 'lxml')
 
@@ -16,8 +14,15 @@ products = soup.find_all('li', class_='ui-search-layout__item')
 product_title = lambda item: item.find('div', {'class': 'ui-search-item__group ui-search-item__group--title'}).find('h2', {'class': 'ui-search-item__title'}).text
 product_price = lambda item: item.find('div', {'class': 'ui-search-price__second-line'}).find('span', {'class': 'price-tag-fraction'}).text.replace('.', '')
 articulo_link = lambda item: item.find('div', {'class': 'ui-search-item__group ui-search-item__group--title'}).find('a')['href']
+clean_n = lambda item: float(item.replace('.', ''))
 
-product1 = products[0]
+def clean_sells(item):
+    element = item.replace('Nuevo  |  ', '').replace(' vendidos', '').replace(' vendido', '').replace('Nuevo', '').replace('Usado  |  ', '')
+    if element == '':
+        n = 0
+    else:
+        n = int(element)
+    return n
 
 def product_img(item):
     try:
@@ -35,11 +40,14 @@ def recopilator(link):
     title = micro_soup.find('div', {'class': 'ui-pdp-header__title-container'}).find('h1', {'class': 'ui-pdp-title'}).text
     price = micro_soup.find('div', {'class': 'ui-pdp-price__second-line'}).find('span', {'class': 'price-tag-fraction'}).text
     sells = micro_soup.find('div', {'class': 'ui-pdp-header'}).find('span', {'class': 'ui-pdp-subtitle'}).text
-    seller_name = micro_soup.find('div', {'class': 'ui-pdp-seller__header__info-container'}).find('p', {'class': 'ui-pdp-seller__header__title'}).text
-    return title, price, sells, seller_name
+    try:
+        seller_name = micro_soup.find('div', {'class': 'ui-pdp-seller__header__info-container'}).find('p', {'class': 'ui-pdp-seller__header__title'}).text
+    except AttributeError:
+        seller_name = 'Sin Nombre'
+    return title, clean_n(price), clean_sells(sells), seller_name, link
 
 if __name__ == '__main__':
-    for i in range(1):
+    for i in range(5):
         soup = BeautifulSoup(r.text, 'lxml')
         products = soup.find_all('li', class_='ui-search-layout__item')
 
