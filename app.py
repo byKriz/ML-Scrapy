@@ -1,10 +1,11 @@
-from selenium import webdriver
 from bs4 import BeautifulSoup
 import requests
 import time
 import random
+import csv
 
-url = 'https://listado.mercadolibre.com.ve/repuestos#D[A:repuestos]'
+# url = 'https://listado.mercadolibre.com.ve/repuestos#D[A:repuestos]'
+url = 'https://carros.mercadolibre.com.ve/repuestos-camionetas/'
 r = requests.get(url)
 soup = BeautifulSoup(r.text, 'lxml')
 
@@ -40,25 +41,36 @@ def recopilator(link):
     title = micro_soup.find('div', {'class': 'ui-pdp-header__title-container'}).find('h1', {'class': 'ui-pdp-title'}).text
     price = micro_soup.find('div', {'class': 'ui-pdp-price__second-line'}).find('span', {'class': 'price-tag-fraction'}).text
     sells = micro_soup.find('div', {'class': 'ui-pdp-header'}).find('span', {'class': 'ui-pdp-subtitle'}).text
+
     try:
         seller_name = micro_soup.find('div', {'class': 'ui-pdp-seller__header__info-container'}).find('p', {'class': 'ui-pdp-seller__header__title'}).text
     except AttributeError:
         seller_name = 'Sin Nombre'
+
     return title, clean_n(price), clean_sells(sells), seller_name, link
 
-if __name__ == '__main__':
-    for i in range(5):
+def ml_scrap(url, page=5):
+    products_scrap_list = []
+    r = requests.get(url)
+    for i in range(page):
         soup = BeautifulSoup(r.text, 'lxml')
         products = soup.find_all('li', class_='ui-search-layout__item')
 
         for product in products:
             time.sleep(random.uniform(2, 4))
-            print(recopilator(articulo_link(product)))
+            products_scrap_list.append(recopilator(articulo_link(product)))
 
         try:
-            time.sleep(random.uniform(9, 11))
+            time.sleep(random.uniform(3, 5))
             next_page_link = soup.find('li', {'class': 'andes-pagination__button andes-pagination__button--next'}).find('a')['href']
             r = requests.get(next_page_link)
         except:
             pass
+
+    return products_scrap_list
+
+if __name__ == '__main__':
+    lista = ml_scrap(url, 1)
+    for i in lista:
+        print(i)
 
