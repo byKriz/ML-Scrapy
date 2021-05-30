@@ -6,14 +6,7 @@ import csv
 
 # url = 'https://listado.mercadolibre.com.ve/repuestos#D[A:repuestos]'
 url = 'https://carros.mercadolibre.com.ve/repuestos-camionetas/'
-r = requests.get(url)
-soup = BeautifulSoup(r.text, 'lxml')
 
-products = soup.find_all('li', class_='ui-search-layout__item')
-
-
-product_title = lambda item: item.find('div', {'class': 'ui-search-item__group ui-search-item__group--title'}).find('h2', {'class': 'ui-search-item__title'}).text
-product_price = lambda item: item.find('div', {'class': 'ui-search-price__second-line'}).find('span', {'class': 'price-tag-fraction'}).text.replace('.', '')
 articulo_link = lambda item: item.find('div', {'class': 'ui-search-item__group ui-search-item__group--title'}).find('a')['href']
 clean_n = lambda item: float(item.replace('.', ''))
 
@@ -32,8 +25,6 @@ def product_img(item):
         item = item.find('div', {'class': 'slick-slide slick-active'}).find('img')['src']
     return item
 
-producto1 = products[0]
-
 # Ahora los articulos
 def recopilator(link):
     r = requests.get(link)
@@ -42,16 +33,22 @@ def recopilator(link):
     price = micro_soup.find('div', {'class': 'ui-pdp-price__second-line'}).find('span', {'class': 'price-tag-fraction'}).text
     sells = micro_soup.find('div', {'class': 'ui-pdp-header'}).find('span', {'class': 'ui-pdp-subtitle'}).text
 
+    seller_data = micro_soup.find_all('li', {'class': 'ui-pdp-seller__item-description'})
+    seller_rate = seller_data[0].find('strong', {'class': 'ui-pdp-seller__sales-description'}).text
+    seller_old = seller_data[1].find('strong', {'class': 'ui-pdp-seller__sales-description'}).text
+    seller_sells = seller_data[2].find('strong', {'class': 'ui-pdp-seller__sales-description'}).text
+
     try:
         seller_name = micro_soup.find('div', {'class': 'ui-pdp-seller__header__info-container'}).find('p', {'class': 'ui-pdp-seller__header__title'}).text
     except AttributeError:
         seller_name = 'Sin Nombre'
 
-    return title, clean_n(price), clean_sells(sells), seller_name, link
+    return title, clean_n(price), clean_sells(sells), seller_name, seller_rate, seller_old, int(seller_sells), link
 
 def ml_scrap(url, page=5):
     products_scrap_list = []
     r = requests.get(url)
+
     for i in range(page):
         soup = BeautifulSoup(r.text, 'lxml')
         products = soup.find_all('li', class_='ui-search-layout__item')
@@ -59,6 +56,7 @@ def ml_scrap(url, page=5):
         for product in products:
             time.sleep(random.uniform(2, 4))
             products_scrap_list.append(recopilator(articulo_link(product)))
+            print(recopilator(articulo_link(product)))
 
         try:
             time.sleep(random.uniform(3, 5))
@@ -70,7 +68,6 @@ def ml_scrap(url, page=5):
     return products_scrap_list
 
 if __name__ == '__main__':
-    lista = ml_scrap(url, 1)
-    for i in lista:
-        print(i)
+    lista = ml_scrap(url, 3)
+
 
