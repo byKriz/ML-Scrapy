@@ -27,7 +27,8 @@ def product_img(item):
 
 # Ahora los articulos
 def recopilator(link):
-    r = requests.get(link)
+    HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36'}
+    r = requests.get(link, headers=HEADER)
     micro_soup = BeautifulSoup(r.text, 'lxml')
     title = micro_soup.find('div', {'class': 'ui-pdp-header__title-container'}).find('h1', {'class': 'ui-pdp-title'}).text
     price = micro_soup.find('div', {'class': 'ui-pdp-price__second-line'}).find('span', {'class': 'price-tag-fraction'}).text
@@ -48,7 +49,8 @@ def recopilator(link):
 def ml_scrap(url, page=5):
     csv_titles = ('Titulo', 'Precio', 'Ventas', 'Nombre del Vendedor', 'Reputacion del Vendedor', 'Antiguedad del Vendedor', 'VT del Vendedor', 'Link')
     products_scrap_list = [csv_titles]
-    r = requests.get(url)
+    HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36'}
+    r = requests.get(url, headers=HEADER)
     n = 1
 
     for i in range(page):
@@ -56,7 +58,7 @@ def ml_scrap(url, page=5):
         products = soup.find_all('li', class_='ui-search-layout__item')
 
         for product in products:
-            # time.sleep(random.uniform(2, 4))
+            time.sleep(random.uniform(2, 4))
             data = recopilator(articulo_link(product))
             products_scrap_list.append(data)
             print(f'{n}', data)
@@ -67,7 +69,7 @@ def ml_scrap(url, page=5):
             next_page_link = soup.find('li', {'class': 'andes-pagination__button andes-pagination__button--next'}).find('a')['href']
             r = requests.get(next_page_link)
         except:
-            pass
+            break
 
     return products_scrap_list
 
