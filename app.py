@@ -73,11 +73,11 @@ def ml_scrap(url, page=5):
 
 def csv_file(data):
     with open('data_ml.csv', 'w', newline='') as file:
-        writer = csv.writer(file, delimiter=';')
+        writer = csv.writer(file)
         writer.writerows(data)
 
 if __name__ == '__main__':
-    lista = ml_scrap(url, 1)
+    lista = ml_scrap(url, 10)
     csv_file(lista)
 
 
