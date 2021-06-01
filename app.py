@@ -46,17 +46,21 @@ def recopilator(link):
     return title, clean_n(price), clean_sells(sells), seller_name, seller_rate, seller_old, int(seller_sells), link
 
 def ml_scrap(url, page=5):
-    products_scrap_list = []
+    csv_titles = ('Titulo', 'Precio', 'Ventas', 'Nombre del Vendedor', 'Reputacion del Vendedor', 'Antiguedad del Vendedor', 'VT del Vendedor', 'Link')
+    products_scrap_list = [csv_titles]
     r = requests.get(url)
+    n = 1
 
     for i in range(page):
         soup = BeautifulSoup(r.text, 'lxml')
         products = soup.find_all('li', class_='ui-search-layout__item')
 
         for product in products:
-            time.sleep(random.uniform(2, 4))
-            products_scrap_list.append(recopilator(articulo_link(product)))
-            print(recopilator(articulo_link(product)))
+            # time.sleep(random.uniform(2, 4))
+            data = recopilator(articulo_link(product))
+            products_scrap_list.append(data)
+            print(f'{n}', data)
+            n += 1
 
         try:
             time.sleep(random.uniform(3, 5))
@@ -67,7 +71,13 @@ def ml_scrap(url, page=5):
 
     return products_scrap_list
 
+def csv_file(data):
+    with open('data_ml.csv', 'w', newline='') as file:
+        writer = csv.writer(file, delimiter=';')
+        writer.writerows(data)
+
 if __name__ == '__main__':
-    lista = ml_scrap(url, 3)
+    lista = ml_scrap(url, 1)
+    csv_file(lista)
 
 
