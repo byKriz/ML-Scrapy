@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import csv
 
-url = 'https://finance.yahoo.com/quote/MSFT/balance-sheet?p=MSFT'
+url = 'https://finance.yahoo.com/quote/MSFT/financials?p=MSFT'
 
 HEADER = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36'}
 r = requests.get(url, headers=HEADER)
@@ -29,7 +29,7 @@ def stract_row(titles, elements):
 
         for e in span_data:
             # print(e.text)
-            data_cache.append(e.text)
+            data_cache.append(e.text.replace(',', ''))
 
         data.append(data_cache)
 
